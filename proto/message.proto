@@ -1,0 +1,99 @@
+syntax = "proto3";
+package pbdata;
+option go_package="generated;pbdata";
+
+/////////////////////
+//
+//  Component
+//
+/////////////////////
+message JpWord {
+  int32 word_id = 1;
+  string word = 2;
+  string spell = 3;
+  string example = 4;
+  translation = 5;
+}
+
+/////////////////////
+//
+//  Service
+//
+/////////////////////
+message CommonReq {
+  // 所有请求可能都应带上的一部分类
+  int32 page = 1;
+  int32 size = 2;
+}
+
+message CommonRsp {
+  string error_code = 1;
+  string error_message = 2;
+}
+
+message JpWordRsp {
+  string error_code = 1;
+  string error_message = 2;
+  repeated JpWord jp_word_list = 3;
+}
+
+enum Cmd {
+  mold = 0;
+}
+
+/////////////////////
+//
+//  Http
+//
+/////////////////////
+
+message MoldReq {
+  int32 uid = 1;
+}
+
+message MoldRsp {
+  bool result = 1;
+  string detail = 2;
+}
+
+/////////////////////
+//
+//  ERROR CODE
+//
+/////////////////////
+
+message ErrorInfo{
+  ErrorCode err_code = 1;
+  string err_info = 2;
+}
+
+enum ErrorCode{
+  err_default = 0;
+  OUT_OF_TIME = 1;
+  //conmon err
+  SERVER_ERROR = 1001;
+  MAINTENANCE = 1002;
+
+  INVALID_ACCOUNT = 2001;
+  ANOTHER_LOGIN = 2002;
+  UNSUPPORTED_VERSION = 2003;
+
+  LACK_ITEM = 3000;
+  LACK_GOLD = 3001;
+  LACK_OIL = 3002;
+  LACK_TICKET = 3003;
+
+  ALREADY_PAID = 4001;
+  ALREADY_RECEIVE = 4002;
+
+  NO_SUCH_REWARD = 5001;
+
+  TEAM_ERR = 6000;
+  NO_SUCH_TEAM = 6001;
+  TEAM_IS_FULL = 6002;
+  TEAM_IS_MATCHING = 6003;
+  ALREADY_IN_TEAM = 6004;
+
+  CLUB_ERR = 7000;
+  NO_SUCH_CLUB = 7001;
+}

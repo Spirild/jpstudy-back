@@ -1,0 +1,25 @@
+{
+    "Modules": [
+        {
+            "Name": "HelloWorld",
+            "Id": 1,
+            "jsonRequest": false,
+            "http_addr": "127.0.0.1:8081"
+        }
+    ],
+    "Node": {
+        "NodeId": 3,
+        "ServerId": 3,
+        "Name": "node3",
+        "Log": {
+            "Env": "dev",
+            "Filename": "log/goserver",
+            "ErrorFileName": "log/Error/goserver_ERROR",
+            "Level": "debug",
+            "Stdout": true,
+            "ErrFile": true,
+            "FileSplitTime": 168
+        },
+        "FrameMS": 0
+    }
+}

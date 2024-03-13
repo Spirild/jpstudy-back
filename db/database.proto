@@ -1,0 +1,14 @@
+syntax = "proto3";
+package dbdata;
+option go_package="generated;dbdata";
+
+message JapaneseVocabularyExternalSourceV1 {
+  int32 id = 1;
+  int64 create_time = 2;
+  string wordThemeName = 3;
+  string wordName = 4;
+  string wordDesc = 5;
+  string wordCorrectDesc = 6;
+  string level = 7;
+  int64 last_select_time = 8;
+}
