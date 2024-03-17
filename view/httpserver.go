@@ -20,6 +20,7 @@ type HttpServer struct {
 	core.BaseComponent
 	selfServer *gin.Engine
 	// 未来可能会对selfServer的具体实现进行重新封装。嗯，大刀阔斧的事未来再说
+	isDev bool
 }
 
 func (hs *HttpServer) ServiceID() int {
@@ -34,14 +35,18 @@ func (hs *HttpServer) Init(n *core.Node, cfg *core.ServiceConfig) {
 	corsConfig := cors.DefaultConfig()
 	// 如果你想允许任何源访问，你可以这样设置（不推荐用于生产环境）
 	// corsConfig.AllowAllOrigins = true
-	// 或者你可以指定允许的源
-	corsConfig.AllowOrigins = []string{"http://127.0.0.1:8080"}
-	corsConfig.AllowMethods = []string{"GET", "POST"}
-	corsConfig.AllowHeaders = []string{"Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization", "accept", "origin", "Cache-Control", "X-Requested-With"}
-	corsConfig.AllowCredentials = true
-	// hs.selfServer.Use(Cors())
-	// 使用CORS中间件
-	hs.selfServer.Use(cors.New(corsConfig))
+
+	hs.isDev, _ = hs.Config.GetBool("is_dev")
+	if hs.isDev {
+		corsConfig.AllowOrigins = []string{"http://127.0.0.1:8080"}
+		corsConfig.AllowMethods = []string{"GET", "POST"}
+		corsConfig.AllowHeaders = []string{"Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization", "accept", "origin", "Cache-Control", "X-Requested-With"}
+		corsConfig.AllowCredentials = true
+		// hs.selfServer.Use(Cors())
+		// 使用CORS中间件
+		hs.selfServer.Use(cors.New(corsConfig))
+	}
+
 	// 以上为跨域配置，实际上线记得去掉
 	hs.selfServer.Use(hs.RecoveryMiddleware())
 	hs.SetURLs()
@@ -92,23 +97,38 @@ func (hs *HttpServer) RecoveryMiddleware() gin.HandlerFunc {
 }
 
 func (hs *HttpServer) SetURLs() {
-	hs.selfServer.GET("/helloworld", HelloWorld)
-	// 注册函数可能还要专门写一个地方。先有个产出
-
-	hs.selfServer.POST("/selectJpTable", hs.GetJpLiteTable)
-	hs.selfServer.POST("/jplevelup", hs.RememberJpWord)
-	hs.selfServer.POST("/jpleveldown", hs.ForgetJpWord)
-	hs.selfServer.POST("/jpinsertupdate", hs.SaveJpWord)
-	hs.selfServer.POST("/jpdelete", hs.DeleteJpWord)
-
-	hs.selfServer.POST("/lookup", hs.TranslateJpWord)
-
-	hs.selfServer.POST("/selectDetailTable", hs.GetJpDetailTable)
-
-	hs.selfServer.GET("/getMarkdown", hs.GetMarkdownContent)
-	hs.selfServer.POST("/saveMarkdown", hs.SaveMarkdownContent)
-
-	hs.selfServer.POST("/askBotDemo", hs.AskBotDemo)
+	type selfRouterConfig struct {
+		path     string
+		function gin.HandlerFunc
+		method   string
+	}
+	SelfRouterConfigList := []*selfRouterConfig{
+		{path: "/helloworld", function: HelloWorld, method: "GET"},
+		{path: "/selectJpTable", function: hs.GetJpLiteTable, method: "POST"},
+		{path: "/jplevelup", function: hs.RememberJpWord, method: "POST"},
+		{path: "/jpleveldown", function: hs.ForgetJpWord, method: "POST"},
+		{path: "/jpinsertupdate", function: hs.SaveJpWord, method: "POST"},
+		{path: "/jpdelete", function: hs.DeleteJpWord, method: "POST"},
+		{path: "/lookup", function: hs.TranslateJpWord, method: "POST"},
+		{path: "/selectDetailTable", function: hs.GetJpDetailTable, method: "POST"},
+		{path: "/getMarkdown", function: hs.GetMarkdownContent, method: "GET"},
+		{path: "/saveMarkdown", function: hs.SaveMarkdownContent, method: "POST"},
+		{path: "/askBotDemo", function: hs.AskBotDemo, method: "POST"},
+	}
+	var p string
+	for _, config := range SelfRouterConfigList {
+		if !hs.isDev {
+			// 为了生产环境部署的改动
+			p = "/back" + config.path
+		} else {
+			p = config.path
+		}
+		if config.method == "POST" {
+			hs.selfServer.POST(p, config.function)
+		} else if config.method == "GET" {
+			hs.selfServer.GET(p, config.function)
+		}
+	}
 }
 
 func (hs *HttpServer) ReadProtoReq(r *http.Request, msg proto.Message) error {
