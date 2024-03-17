@@ -31,8 +31,15 @@ type Node struct {
 	// 但，真用不上，跳过吧
 }
 
+var FirstNode *Node // 作为源初node的拷贝，全局获取一些node功能
+
 func (n *Node) GetLogger() *zap.Logger {
 	return n.log
+}
+
+func GetDefaultNode() *Node {
+	// 获取0号源初node，这是即用即消的node
+	return FirstNode
 }
 
 func NewNode(cfg *NodeConfig) *Node {
@@ -52,6 +59,10 @@ func NewNode(cfg *NodeConfig) *Node {
 		zap.Int("Server ID", n.SID),
 		zap.String("node", n.Name))
 	n.log = n.log.With(zap.Namespace("msg"))
+	if FirstNode == nil {
+		FirstNode = &n // 感觉有些危险
+	}
+
 	return &n
 }
 

@@ -1,2 +1,4 @@
 goserver.exe
+config.json
 *.log
+*.bak

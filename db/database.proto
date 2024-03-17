@@ -4,11 +4,29 @@ option go_package="generated;dbdata";
 
 message JapaneseVocabularyExternalSourceV1 {
   int32 id = 1;
-  int64 create_time = 2;
+  string create_time = 2;
   string wordThemeName = 3;
   string wordName = 4;
   string wordDesc = 5;
   string wordCorrectDesc = 6;
   string level = 7;
-  int64 last_select_time = 8;
+  string last_select_time = 8;
+  int32 is_del = 9;
+}
+
+message CharacterVocabularyTable {
+  int32 id = 1;
+  string vocabulary = 2;
+  string sample_sentence = 3;
+  string character = 4;
+  int32 memory_level = 5;
+  string translator = 6;
+  string update_time = 7;
+  string user_qq = 8;
+}
+
+message MojiToken {
+  int32 id = 1;
+  string update_time = 2;
+  string content = 3;
 }

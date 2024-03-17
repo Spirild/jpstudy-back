@@ -12,7 +12,7 @@ message JpWord {
   string word = 2;
   string spell = 3;
   string example = 4;
-  translation = 5;
+  string translation = 5;
 }
 
 /////////////////////
@@ -27,18 +27,87 @@ message CommonReq {
 }
 
 message CommonRsp {
-  string error_code = 1;
+  int32 error_code = 1;
   string error_message = 2;
 }
 
+message PageRsp {
+  int32 page = 1;
+  int32 size = 2;
+  int32 total = 3;
+}
+
+message JpWordReq {
+  CommonReq common = 1;
+  int32 level = 2;
+  string word = 3;
+}
+
 message JpWordRsp {
-  string error_code = 1;
+  int32 error_code = 1;
   string error_message = 2;
   repeated JpWord jp_word_list = 3;
+  PageRsp common = 4;
+}
+
+message RememberJpWordReq {
+  int32 word_id = 1;
+}
+
+message ForgetJpWordReq {
+  int32 word_id = 1;
+}
+
+message SaveJpWordReq {
+  JpWord jp_word = 1;
+}
+
+message DeleteJpWordReq {
+  int32 word_id = 1;
+}
+
+message TranslateJpReq {
+  string word = 1;
+}
+
+message TranslateJpRsp {
+  int32 error_code = 1;
+  string error_message = 2;
+  repeated JpWord word_list = 3;
+}
+
+message SaveMarkdownReq {
+  string markdown_content = 1;
+}
+
+message GetMarkdownRsp {
+  int32 error_code = 1;
+  string error_message = 2;
+  string markdown_content = 3;
+}
+
+message AskBotReq {
+  string content = 1;
+}
+
+message AskBotRsp {
+  int32 error_code = 1;
+  string error_message = 2;
+  string content = 3;
 }
 
 enum Cmd {
   mold = 0;
+}
+
+/////////////////////
+//
+//  Request
+//
+/////////////////////
+message MojiResponseWord {
+  string title = 1;
+  string excerpt = 2;
 }
 
 /////////////////////
@@ -67,7 +136,16 @@ message ErrorInfo{
   string err_info = 2;
 }
 
-enum ErrorCode{
+enum ErrorCode {
+  Default = 0;
+  DATABASE = 1;
+  THIRD = 2;
+
+  SUCCESS = 200;
+  UNKNOWN = 500;
+}
+
+enum ErrorCodeBefore{
   err_default = 0;
   OUT_OF_TIME = 1;
   //conmon err

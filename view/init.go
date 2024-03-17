@@ -6,7 +6,7 @@ import (
 
 // module register
 func init() {
-	core.RegisterCompType("HelloWorld", (*HttpServer)(nil))
+	core.RegisterCompType("HttpService", (*HttpServer)(nil))
 }
 
 // type IHelloWorld interface {

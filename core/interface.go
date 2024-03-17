@@ -14,11 +14,6 @@ type IComponent interface {
 	FindService(serviceID int) (IService, bool)
 }
 
-// type IError interface {
-// 	Error() string
-// 	Code() int
-// }
-
 type IHttpServer interface {
 	Run() error
 	Shutdown()
@@ -32,10 +27,3 @@ type ISocketServer interface {
 type IService interface {
 	ServiceID() int
 }
-
-// type IServiceManager interface {
-// 	Add(svc IService)
-// 	Remove(svc IService)
-// 	Len() int
-// 	Get(sid int) IService
-// }

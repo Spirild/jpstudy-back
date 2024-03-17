@@ -13,7 +13,7 @@ set PROTO_DIR=..\\proto
 set JAVASCRIPT_DIR=..\\proto\\js
 set DBPROTO_DIR=..\\db
 
-protoc -I=%PROTO_DIR% --go_out=%PROTO_DIR% --go-grpc_out=%PROTO_DIR% %PROTO_DIR%\*.proto
+protoc -I=%PROTO_DIR% --go_out=%PROTO_DIR% %PROTO_DIR%\*.proto
 protoc -I=%PROTO_DIR% --js_out=import_style=commonjs,binary:%JAVASCRIPT_DIR% %PROTO_DIR%\*.proto
 
 protoc -I=%DBPROTO_DIR% --go_out=%DBPROTO_DIR% %DBPROTO_DIR%\*.proto
