@@ -2,3 +2,5 @@ goserver.exe
 config.json
 *.log
 *.bak
+markdown.md
+message_pb.js
