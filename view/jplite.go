@@ -25,12 +25,37 @@ func (hs *HttpServer) GetJpLiteTable(c *gin.Context) {
 	rsp, err := JpLiteController.GetJpLiteTable(jpLiteReq)
 	if err != nil {
 		c.JSON(int(pbdata.ErrorCode_UNKNOWN), gin.H{
-			"errorCode": int(pbdata.ErrorCode_UNKNOWN),
-			"errorMsg":  err.Error(),
+			"error_code": int(pbdata.ErrorCode_UNKNOWN),
+			"error_msg":  err.Error(),
 		})
 		return
 	}
 	// 这里的下划线找机会确认什么原因
+	t, _ := utils.SelfMarshal(*rsp)
+	c.Data(int(pbdata.ErrorCode_SUCCESS), "application/json", t)
+}
+
+func (hs *HttpServer) GetJpCardTable(c *gin.Context) {
+	JpLiteController := jpliteservice.GetJpLiteServiceInstant()
+	jpCardReq := &pbdata.CommonReq{}
+	err := hs.ReadProtoReq(c.Request, jpCardReq)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error_code": http.StatusBadRequest,
+			"error_msg":  err.Error(),
+		})
+		return
+	}
+
+	rsp, err := JpLiteController.GetJpCardList(jpCardReq)
+	if err != nil {
+		c.JSON(int(pbdata.ErrorCode_UNKNOWN), gin.H{
+			"error_code": int(pbdata.ErrorCode_UNKNOWN),
+			"error_msg":  err.Error(),
+		})
+		return
+	}
+
 	t, _ := utils.SelfMarshal(*rsp)
 	c.Data(int(pbdata.ErrorCode_SUCCESS), "application/json", t)
 }

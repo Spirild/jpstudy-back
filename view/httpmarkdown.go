@@ -40,7 +40,7 @@ func (hs *HttpServer) SaveMarkdownContent(c *gin.Context) {
 		return
 	}
 
-	f, _ := os.OpenFile(markdown, os.O_WRONLY, 0666)
+	f, _ := os.OpenFile(markdown, os.O_WRONLY|os.O_TRUNC, 0666)
 	_, err = f.Write(data)
 	if err != nil {
 		hs.Log.Error(err.Error())

@@ -17,7 +17,8 @@ type IDatabaseService interface {
 	SelfInsert(value interface{}) error // this is common insert
 
 	// Read
-	SelectJpTableLite(level int, word string) []*dbdata.CharacterVocabularyTable
+	SelectJpTableLite(level int, word string, user string) []*dbdata.CharacterVocabularyTable
+	SelectJpTableLiteTotal(user string) []*dbdata.CharacterVocabularyTable
 	GetMojiTokenMold() *dbdata.MojiToken
 	SelectJpTableDetail(start int, end int) ([]*dbdata.JapaneseVocabularyExternalSourceV1, int)
 

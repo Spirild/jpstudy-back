@@ -24,6 +24,7 @@ message CommonReq {
   // 所有请求可能都应带上的一部分类
   int32 page = 1;
   int32 size = 2;
+  string user = 3;
 }
 
 message CommonRsp {
@@ -60,6 +61,7 @@ message ForgetJpWordReq {
 
 message SaveJpWordReq {
   JpWord jp_word = 1;
+  string user = 2;
 }
 
 message DeleteJpWordReq {
@@ -68,6 +70,7 @@ message DeleteJpWordReq {
 
 message TranslateJpReq {
   string word = 1;
+  string user = 2;
 }
 
 message TranslateJpRsp {

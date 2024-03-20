@@ -31,18 +31,18 @@ func (hs *HttpServer) Init(n *core.Node, cfg *core.ServiceConfig) {
 	(&hs.BaseComponent).Init(n, cfg)
 	hs.selfServer = gin.Default()
 
-	// 创建一个CORS配置对象
-	corsConfig := cors.DefaultConfig()
 	// 如果你想允许任何源访问，你可以这样设置（不推荐用于生产环境）
 	// corsConfig.AllowAllOrigins = true
 
 	hs.isDev, _ = hs.Config.GetBool("is_dev")
 	if hs.isDev {
-		corsConfig.AllowOrigins = []string{"http://127.0.0.1:8080"}
+		// 创建一个CORS配置对象
+		corsConfig := cors.DefaultConfig()
+		// corsConfig.AllowAllOrigins = true
+		corsConfig.AllowOrigins = []string{"http://127.0.0.1:8080", "http://localhost:8080"}
 		corsConfig.AllowMethods = []string{"GET", "POST"}
-		corsConfig.AllowHeaders = []string{"Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization", "accept", "origin", "Cache-Control", "X-Requested-With"}
+		corsConfig.AllowHeaders = []string{"Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization", "accept", "origin", "Cache-Control", "X-Requested-With", "Access-Control-Allow-Origin"}
 		corsConfig.AllowCredentials = true
-		// hs.selfServer.Use(Cors())
 		// 使用CORS中间件
 		hs.selfServer.Use(cors.New(corsConfig))
 	}
@@ -114,6 +114,7 @@ func (hs *HttpServer) SetURLs() {
 		{path: "/getMarkdown", function: hs.GetMarkdownContent, method: "GET"},
 		{path: "/saveMarkdown", function: hs.SaveMarkdownContent, method: "POST"},
 		{path: "/askBotDemo", function: hs.AskBotDemo, method: "POST"},
+		{path: "/getJpCard", function: hs.GetJpCardTable, method: "POST"},
 	}
 	var p string
 	for _, config := range SelfRouterConfigList {

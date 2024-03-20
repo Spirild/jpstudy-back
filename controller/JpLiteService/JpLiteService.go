@@ -1,7 +1,9 @@
 package jpliteservice
 
 import (
+	"math/rand"
 	"strings"
+	"time"
 
 	"translasan-lite/common"
 	"translasan-lite/core"
@@ -36,6 +38,7 @@ func (js *JpLiteService) init() {
 }
 
 func (js *JpLiteService) GetJpLiteTable(req *pbdata.JpWordReq) (*pbdata.JpWordRsp, error) {
+	// 获取轻词表
 	pageRsp := &pbdata.PageRsp{
 		Page: req.Common.Page,
 		Size: req.Common.Size,
@@ -52,7 +55,7 @@ func (js *JpLiteService) GetJpLiteTable(req *pbdata.JpWordReq) (*pbdata.JpWordRs
 		return rsp, nil
 	}
 
-	res := ds.SelectJpTableLite(int(req.Level), req.Word)
+	res := ds.SelectJpTableLite(int(req.Level), req.Word, req.Common.User)
 	rsp.Common.Total = int32(len(res))
 	res = utils.Paginate(res, int(req.Common.Page), int(req.Common.Size))
 	for _, r := range res {
@@ -71,6 +74,7 @@ func (js *JpLiteService) GetJpLiteTable(req *pbdata.JpWordReq) (*pbdata.JpWordRs
 }
 
 func (js *JpLiteService) RememberJpWord(req *pbdata.RememberJpWordReq) (*pbdata.CommonRsp, error) {
+	// 这次记住了该单词
 	rsp := &pbdata.CommonRsp{}
 	ds, err := js.getDatabaseServiceClient()
 	if err != nil {
@@ -93,6 +97,7 @@ func (js *JpLiteService) RememberJpWord(req *pbdata.RememberJpWordReq) (*pbdata.
 }
 
 func (js *JpLiteService) ForgetJpWord(req *pbdata.ForgetJpWordReq) (*pbdata.CommonRsp, error) {
+	// 这次忘记了该单词
 	rsp := &pbdata.CommonRsp{}
 	ds, err := js.getDatabaseServiceClient()
 	if err != nil {
@@ -131,6 +136,7 @@ func (js *JpLiteService) SaveJpWord(req *pbdata.SaveJpWordReq) (*pbdata.CommonRs
 		SampleSentence: req.JpWord.Example,
 		MemoryLevel:    1,
 		UpdateTime:     utils.GetCurrentTimeStr(),
+		UserQq:         req.User,
 	}
 	if req.JpWord.WordId == 0 {
 		// 说明是新建的
@@ -151,6 +157,7 @@ func (js *JpLiteService) SaveJpWord(req *pbdata.SaveJpWordReq) (*pbdata.CommonRs
 }
 
 func (js *JpLiteService) DeleteJpWord(req *pbdata.DeleteJpWordReq) (*pbdata.CommonRsp, error) {
+	// 删除单词
 	rsp := &pbdata.CommonRsp{}
 	ds, err := js.getDatabaseServiceClient()
 	if err != nil {
@@ -173,6 +180,7 @@ func (js *JpLiteService) DeleteJpWord(req *pbdata.DeleteJpWordReq) (*pbdata.Comm
 }
 
 func (js *JpLiteService) TranslateJpWord(req *pbdata.TranslateJpReq) (*pbdata.TranslateJpRsp, error) {
+	// 翻译单词
 	rsp := &pbdata.TranslateJpRsp{}
 	ts, err := js.getThirdServiceClient()
 	if err != nil {
@@ -209,8 +217,16 @@ func (js *JpLiteService) TranslateJpWord(req *pbdata.TranslateJpReq) (*pbdata.Tr
 			SampleSentence: res.Excerpt,
 			UpdateTime:     utils.GetCurrentTimeStr(),
 			MemoryLevel:    1,
+			UserQq:         req.User,
 		}
-		ds.SelfInsert(dbWord)
+		check := ds.SelectJpTableLite(0, word, req.User)
+		if len(check) == 0 {
+			ds.SelfInsert(dbWord)
+		} else {
+			dbWord.IsDel = 0
+			ds.SelfUpdate(dbWord)
+		}
+
 		rsp.WordList = append(rsp.WordList, &pbdata.JpWord{
 			Word:        word,
 			Spell:       spell,
@@ -220,6 +236,42 @@ func (js *JpLiteService) TranslateJpWord(req *pbdata.TranslateJpReq) (*pbdata.Tr
 
 	rsp.ErrorCode = int32(pbdata.ErrorCode_SUCCESS)
 	rsp.ErrorMessage = "SUCCESS"
+	return rsp, nil
+}
+
+func (js *JpLiteService) GetJpCardList(req *pbdata.CommonReq) (*pbdata.JpWordRsp, error) {
+	pageRsp := &pbdata.PageRsp{
+		Size: req.Size,
+	}
+	rsp := &pbdata.JpWordRsp{
+		Common: pageRsp,
+	}
+
+	ds, err := js.getDatabaseServiceClient()
+	if err != nil {
+		js.Log.Error("error", zap.Error(err))
+		rsp.ErrorCode = int32(pbdata.ErrorCode_DATABASE)
+		rsp.ErrorMessage = "database problem"
+		return rsp, nil
+	}
+
+	res := ds.SelectJpTableLiteTotal(req.User)
+	src := rand.NewSource(time.Now().UnixNano())
+	rnd := rand.New(src)
+	// 生成一个[min, max]范围内的随机整数
+	start := rnd.Intn(len(res) - int(req.Size))
+	for _, r := range res[start : start+int(req.Size)] {
+		rsp.JpWordList = append(rsp.JpWordList, &pbdata.JpWord{
+			WordId:      r.Id,
+			Word:        r.Vocabulary,
+			Spell:       r.Character,
+			Translation: r.Translator,
+			Example:     r.SampleSentence,
+		})
+	}
+	rsp.ErrorCode = int32(pbdata.ErrorCode_SUCCESS)
+	rsp.ErrorMessage = "SUCCESS"
+
 	return rsp, nil
 }
 

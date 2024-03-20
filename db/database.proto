@@ -23,6 +23,7 @@ message CharacterVocabularyTable {
   string translator = 6;
   string update_time = 7;
   string user_qq = 8;
+  int32 is_del = 9;
 }
 
 message MojiToken {
